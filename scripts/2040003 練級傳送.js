@@ -1,6 +1,7 @@
 /*
  * 練級傳送
  * 2022/06/20 簡化
+ * 含部分個人端口地圖，請自行刪減或修改。
  */
 var status = 0;
 // [地圖名稱, 等級限制, 機率性掉落道具, 等級下限, 等級上限]
@@ -67,17 +68,29 @@ function action(mode, type, selection) {
         var msg = "#k我是練級傳送員，請選擇你的目的地：";
         for (var i = 0; i < mapList.length; i++) {
             msg += "\r\n#L" + i + "#";
+
+            var mapName = mapList[i][0];
+            var mapLevel = mapList[i][1];
+            var mapItem = mapList[i][2];
+
+            // 前四張自製地圖
             if (i < 4) {
-                msg += "#r" + mapList[i][0] + "(" + mapList[i][1] + ")";
-                if (mapList[i][2]) msg += "【會掉落#z" + mapList[i][2] + "#】";
+                // 前四張自製地圖整行字是紅的
+                msg += "#r" + mapName + "(" + mapLevel + ")"; // 未來東京（太空艦隊）(120↑)
+                if (mapItem) {
+                    msg += "【會掉落#z" + mapItem + "#】"; // 【會掉落楓幣】
+                }
                 msg += "#b#l";
             } else {
-                msg += mapList[i][0] + "(" + mapList[i][1] + ")";
-                if (mapList[i][2]) {
+                // 其他地圖名稱是白的
+                msg += mapName + "(" + mapLevel + ")";
+
+                if (mapItem) {
+                    // 武器庫和未來東京地圖掉落物用紅字強調
                     if (i === 23 || i > 31) {
-                        msg += "#r【會掉落#z" + mapList[i][2] + "#】#b";
+                        msg += "#r【會掉落#z" + mapItem + "#】#b";
                     } else {
-                        msg += "【會掉落#z" + mapList[i][2] + "#】";
+                        msg += "【會掉落#z" + mapItem + "#】";
                     }
                 }
                 msg += "#l";
@@ -89,10 +102,11 @@ function action(mode, type, selection) {
         var flag = true; 
 
         // 地圖等級限制
-        if (mapList[selection][3] || mapList[selection][4]) {
-            var level = cm.getPlayer().getLevel();
-            var lower = mapList[selection][3];
-            var upper = mapList[selection][4];
+        var level = cm.getPlayer().getLevel();
+        var lower = mapList[selection][3];
+        var upper = mapList[selection][4];
+
+        if (lower || upper) {
             // 等級超出地圖限制
             if (lower && level < lower) {
                 flag = false;
