@@ -87,9 +87,9 @@ function action(mode, type, selection) {
     if (selection === 99) {
       var playerName = cm.getPlayer().getName();
       var text = playerName + Year + "年" + MonthS[Month] + tzc + "日xtyzq";
-      var record = cm.getBossLog2(text) == 0;
+      var record = cm.getBossLog2(text);
       // 檢查 db 中是否已有紀錄, 若有代表今日已經去過
-      if (record) {
+      if (record == 0) {
         // 重置地圖
         cm.getMap(999999993).resetFully(); 
         // 新增紀錄
