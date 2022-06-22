@@ -5,21 +5,6 @@
 var status = -1;
 var req = [5220000, 1];
 
-//物品ID,機率(數字越高越不容易抽到),是否上廣
-var GachItem = [
-  [1122034, 900, true],
-  [1122035, 900, true],
-  [1122036, 900, true],
-  [1122037, 900, true],
-  [1122038, 900, true],
-  [1122000, 900, true],
-  [1012169, 900, true],
-  [1012170, 900, true],
-  [1012171, 900, true],
-  [1012172, 900, true],
-  [1012173, 900, true],
-  [1012174, 900, true]
-];
 // 獎池
 var itemList = [
   1002391, 1002392, 1002393, 1012169, 1002394, 1002395, 1112414, 1022097,
@@ -48,8 +33,74 @@ var itemList = [
   1102042, 1102043, 1102079, 1102081, 1102082, 1102000,
 ];
 
+// 特殊獎品, 會上綠廣的
+var gachItem = [1122034, 1122035, 1122036, 1122037, 1122038, 1122000, 1012169, 
+  1012170, 1012171, 1012172, 1012173, 1012174];
+
 function start() {
   action(1, 0, 0);
+}
+
+var rewards = ""; // 獎品列表
+var times = 0; // 消耗的轉蛋卷數
+var haveSpace = true; // 還有沒有空間
+var haveItem = true; // 還有沒有轉蛋卷
+var stop; // result = -1;  => SRC : gainGachaponItem 方法裡面的 addbyId_Gachapon 如果有某個類別欄位已滿會回傳 -1
+
+/* 重置 */
+function init() {
+  rewards = "";
+  times = 0;
+  haveSpace = true;
+  haveItem = true;
+}
+
+/* 轉蛋 */
+function draw() {
+  var result;
+  var random = Math.floor(Math.random() * itemList.length); // 產生亂數抽取獎池其中一個道具
+  var item = itemList[random]; // 抽中的道具
+
+  if (cm.getPlayer().itemQuantity(req[0]) - times < 1) {
+    // 情況1: 剩餘轉蛋卷不足
+    haveItem = false;
+  } else if (!cm.getPlayer().haveSpaceForId(item)) {
+    // 情況2: 剩餘空間不足
+    haveSpace = false;
+  } else {
+    var special = gachItem.indexOf(item) !== -1;
+
+    // 中了特殊獎
+    if (special) {
+      result = cm.gainGachaponItem(item, 1, true);
+    } else if (!special) { // 一般獎
+      result = cm.gainItem(item, 1);
+    }
+
+    if (result === -1) {
+      stop = true;
+    } else {
+      rewards += "#i" + item + "#";
+      times++;
+    }
+  }
+}
+
+/**
+ * 結算
+ * @param {*} type 0: 單抽 1: 十抽
+ */
+function finish(type) {
+  if (times > 0) {
+    var msg = type === 1 ? "\r\n#L996##b繼續十抽#l　#L997##b前往單抽#l" : "\r\n#L997##b繼續單抽#l　#L996##b前往十抽#l";
+    cm.gainItem(req[0], -times);
+    cm.sendNext("恭喜獲得\r\n" + rewards + msg + "\r\n#L998##r結束轉蛋#l　#L999##d返回上一頁#l");
+  } else if (!haveSpace || stop) {
+    cm.sendOk("不好意思，請確認您的背包是否有空位。");
+  } else if (!haveItem) {
+    cm.sendOk("不好意思，您身上的#b#t" + req[0] + "##i" + req[0] + "##k不足！");
+  }
+  init();
 }
 
 function action(mode, type, selection) {
@@ -74,76 +125,20 @@ function action(mode, type, selection) {
     switch (selection) {
       // 單抽
       case 0:
-        var random = Math.floor(Math.random() * itemList.length);
-        var reward = itemList[random];
-        var haveSpace = cm.getPlayer().haveSpaceForId(reward);
-
-        if (cm.haveItem(req[0], req[1]) && haveSpace) {
-          
-          cm.gainItem(req[0], -req[1]);
-          cm.gainItem(reward, 1);
-          cm.sendNext("恭喜獲得#i" + reward + "##b#z" + reward + "#\r\n#L997##b繼續單抽#l　#L996##b前往十抽#l\r\n#L998##r結束轉蛋#l　#L999##d返回上一頁#l");
-        } else if (!haveSpace) {
-          cm.sendOk("不好意思，請確認您的背包是否有空位。");
-          cm.dispose();
-        } else if (!cm.haveItem(req[0], req[1])) {
-          cm.sendOk("不好意思，您身上的#b#t" + req[0] + "##i" + req[0] + "##k不足！");
-          cm.dispose();
+        if (!stop && haveSpace) {
+          draw();
         }
+        finish(0);
         break;
       // 十抽
       case 1:
-        var rewards = ""; // 獎品列表
-        var times = 0; // 消耗的轉蛋卷數
-        var haveSpace = true; // 還有沒有空間
-        var haveItem = true; // 還有沒有轉蛋卷
         for (var counts = 0; counts < 10; counts++) {
-          // 剩餘轉蛋卷不足
-          if (!cm.haveItem(req[0], req[1])) {
-            haveItem = false;
+          if (stop || !haveSpace) {
             break;
           }
-
-          var special = false; // 是否中獎
-          for (var i = 0; i < GachItem.length; i++) {
-            var GItem = GachItem[i];
-            // 中獎
-            if (Math.floor(Math.random() * GItem[1]) == 0) {
-              // 檢查欄位數是否足夠
-              if (cm.getPlayer().haveSpaceForId(GItem[0])) {
-                cm.gainGachaponItem(GItem[0], 1, GItem[2]);
-                rewards += "#i" + GItem[0] + "#";
-                special = true;
-                times++;
-              } else {
-                haveSpace = false;
-                break;
-              }
-            }
-          }
-
-          // 沒中獎
-          var index = Math.floor(Math.random() * itemList.length);
-          if (!special) {
-            if (cm.getPlayer().haveSpaceForId(itemList[index])) {
-              cm.gainGachaponItem(itemList[index], 1);
-              rewards += "#i" + itemList[index] + "#";
-              times++;
-            } else {
-              haveSpace = false;
-              break;
-            }
-          }
+          draw();
         }
-
-        if (times !== 0) {
-          cm.gainItem(req[0], -times);
-          cm.sendNext("恭喜獲得\r\n" + rewards + "\r\n#L996##b繼續十抽#l　#L997##b前往單抽#l\r\n#L998##r結束轉蛋#l　#L999##d返回上一頁#l");
-        } else if (!haveSpace) {
-          cm.sendOk("不好意思，請確認您的背包是否有空位。");
-        } else if (!haveItem) {
-          cm.sendOk("不好意思，您身上的#b#t" + req[0] + "##i" + req[0] + "##k不足！");
-        }
+        finish(1);
         break;
       // 確認獎池
       case 2:
