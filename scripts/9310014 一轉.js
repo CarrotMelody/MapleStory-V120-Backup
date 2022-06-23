@@ -1,66 +1,78 @@
-/* 一轉轉職 */
+/** 
+ * 一轉轉職 NPC
+ * 2022/06/24 簡化
+ */
+var status = 0;
+var selectedJob, selectedJobName;
+var jobList = [
+  ["劍士", 100], ["法師", 200], ["弓箭手", 300], ["盜賊", 400], ["海盜", 500], ["下忍", 430], 
+  ["狂狼勇士", 2100], ["龍魔導士", 2200], ["聖魂劍士", 1100], ["烈焰巫師", 1200], ["破風使者", 1300], 
+  ["暗夜行者", 1400], ["閃雷悍將", 1500]
+];
 
 function start() {
   status = -1;
   action(1, 0, 0);
 }
+
 function action(mode, type, selection) {
-  if (mode == -1) {
-    cm.dispose();
+  var job = cm.getPlayer().getJob();
+  var level = cm.getPlayer().getLevel();
+
+  if (mode == 1) {
+    status++;
   } else {
-    if (mode == 1) status++;
-    else status--;
-    if (status == 0) {
-      if (
-        (cm.getPlayer().getJob() == 0 || cm.getPlayer().getJob() == 2000) &&
-        cm.getPlayer().getLevel() >= 10 &&
-        cm.getPlayer().getLevel() < 30
-      ) {
-        cm.sendSimple(
-          "這裡為一轉轉職，你想成為：\r\n#r #L1#劍士#l #L11#魔法師#l #L21#弓箭手#l #L28#盜賊#l #L35#海盜#l #L46#狂狼勇士#l"
-        );
-      } else {
-        cm.sendOk("你似乎不符合一轉資格哦！");
-        cm.dispose();
+    status--;
+  }
+
+  if (status == -1) {
+    cm.dispose();
+  }
+
+  if (status == 0) {
+    // 可以進行一轉的職業: 初心者, 貴族, 傳說, 龍魔導士(0轉); 可以進行一轉的等級: 10 ~ 30
+    if ([0, 1000, 2000, 2001].indexOf(job) !== -1 && level >= 10) {
+      var msg = "這裡為一轉轉職NPC，你想成為：\r\n#r";
+      for (var i = 0; i < jobList.length; i++) {
+        msg += "#L" + i + "#" + jobList[i][0] + "#l ";
       }
-    } else if (status == 1) {
-      if (selection == 1) {
-        jobName = "劍士";
-        job = 100;
-      } else if (selection == 11) {
-        jobName = "魔法師";
-        job = 200;
-      } else if (selection == 21) {
-        jobName = "弓箭手";
-        job = 300;
-      } else if (selection == 28) {
-        jobName = "盜賊";
-        job = 400;
-      } else if (selection == 35) {
-        jobName = "海盜";
-        job = 500;
-      } else if (selection == 46) {
-        if (cm.getPlayer().getJob() == 2000) {
-          jobName = "狂狼勇士";
-          job = 2100;
-        } else {
-          cm.sendOk("你不能轉為狂狼勇士哦！");
-        }
-      }
-      cm.sendYesNo("#d你想成為: #r[" + jobName + "]#k #d嗎?");
-    } else if (status == 2) {
-      if (
-        (cm.getPlayer().getJob() == 0 || cm.getPlayer().getJob() == 2000) &&
-        cm.getPlayer().getLevel() >= 10
-      ) {
-        cm.changeJob(job);
-        cm.dispose();
-      } else {
-        cm.sendOk("#d你沒有符合一轉的需求#k #d!");
-        cm.dispose();
-      }
+      cm.sendSimple(msg);
     } else {
+      cm.sendOk("你似乎不符合一轉資格哦！");
       cm.dispose();
     }
+  } else if (status == 1) {
+    selectedJobName = jobList[selection][0];
+    selectedJob = jobList[selection][1];
+
+    // 狂狼勇士須為傳說才能轉職
+    if (selectedJob === 2100) {
+      if (job !== 2000) {
+        cm.sendOk("你不能轉為" + selectedJobName + "哦！必須是傳說才能轉職。");
+      }
+    }
+    // 龍魔導士(1轉)須為龍魔導士(0轉)才能轉職
+    if (selectedJob === 2200) {
+      if (job !== 2001) {
+        cm.sendOk("你不能轉為" + selectedJobName + "哦！必須是龍魔導士(0轉)才能轉職。");
+      }
+    }
+    // 皇家騎士團須為貴族才能轉職
+    if (selectedJob >= 1100 && selectedJob <= 1500) {
+      if (job !== 1000) {
+        cm.sendOk("你不能轉為" + selectedJobName + "哦！必須是貴族才能轉職。");
+      }
+    }
+    // 其他都是初心者才能轉
+    if (selectedJob < 1000) {
+      if (job !== 0) {
+        cm.sendOk("你不能轉為" + selectedJobName + "哦！必須是初心者才能轉職。");
+      }
+    }
+
+    cm.sendYesNo("#d你確認要轉職為: #r[" + selectedJobName + "]#k #d嗎？");
+  } else if (status == 2) {
+    cm.changeJob(job);
+    cm.dispose();
   }
 }
