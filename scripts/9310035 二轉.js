@@ -6,12 +6,18 @@
 var status = 0;
 var selectedJob, selectedJobName;
 var jobList = {
-  100: [{ jobName: "狂戰士", job: 110 }, { jobName: "見習騎士", job: 120 }, { jobName: "槍騎兵", job: 130 }], // 劍士
-  200: [{ jobName: "法師(冰,雷)", job: 220 }, { jobName: "法師(火,毒)", job: 210 }, { jobName: "僧侶", job: 230 }], // 法師
-  300: [{ jobName: "獵人", job: 310 }, { jobName: "弩手", job: 320 }], // 弓箭手
-  400: [{ jobName: "刺客", job: 410 }, { jobName: "俠盜", job: 420 }], // 盜賊
-  500: [{ jobName: "打手", job: 510 }, { jobName: "槍手", job: 520 }], // 海盜
-  2100: [{ jobName: "狂狼勇士(2轉)", job: 2110 }], // 狂狼勇士
+  100: [{ name: "狂戰士", job: 110 }, { name: "見習騎士", job: 120 }, { name: "槍騎兵", job: 130 }], // 劍士
+  200: [{ name: "法師(冰,雷)", job: 220 }, { name: "法師(火,毒)", job: 210 }, { name: "僧侶", job: 230 }], // 法師
+  300: [{ name: "獵人", job: 310 }, { name: "弩手", job: 320 }], // 弓箭手
+  400: [{ name: "刺客", job: 410 }, { name: "俠盜", job: 420 }], // 盜賊
+  500: [{ name: "打手", job: 510 }, { name: "槍手", job: 520 }], // 海盜
+  2100: [{ name: "狂狼勇士(2轉)", job: 2110 }], // 狂狼勇士
+  2200: [{ name: "龍魔導士(2轉)", job: 2210 }], // 龍魔導士
+  1100: [{ name: "聖魂劍士(2轉)", job: 1110 }], // 聖魂劍士
+  1200: [{ name: "烈焰巫師(2轉)", job: 1210 }], // 烈焰巫師
+  1300: [{ name: "破風使者(2轉)", job: 1310 }], // 破風使者
+  1400: [{ name: "暗夜行者(2轉)", job: 1410 }], // 暗夜行者
+  1500: [{ name: "閃雷悍將(2轉)", job: 1510 }], // 閃雷悍將
 }
 
 function start() {
@@ -44,7 +50,7 @@ function action(mode, type, selection) {
     if (jobList[job]?.length) {
       var msg = "你已經符合條件，可以進行第二次轉職，請選擇你的職業:#b";
       for (var i = 0; i < jobList[job].length; i++) {
-        msg += "\r\n#L" + i + "#" + jobList[job][i].jobName + "#l";
+        msg += "\r\n#L" + i + "#" + jobList[job][i].name + "#l";
       }
       cm.sendSimple(msg + "#k");
     } else {
@@ -52,11 +58,11 @@ function action(mode, type, selection) {
       cm.dispose();
     }
   } else if (status == 2) {
-    selectedJobName = jobList[job][selection].jobName;
+    selectedJobName = jobList[job][selection].name;
     selectedJob = jobList[job][selection].job;
-    cm.sendYesNo("你真的決定要轉職為#r" + jobName + "#k嗎？");
+    cm.sendYesNo("你真的決定要轉職為#r" + name + "#k嗎？");
   } else if (status == 3) {
-    cm.changeJob(job);
+    cm.changeJob(selectedJob);
     cm.sendOk("轉職成功");
   }
 }

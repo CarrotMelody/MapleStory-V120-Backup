@@ -72,7 +72,7 @@ function action(mode, type, selection) {
 
     cm.sendYesNo("#d你確認要轉職為: #r[" + selectedJobName + "]#k #d嗎？");
   } else if (status == 2) {
-    cm.changeJob(job);
+    cm.changeJob(selectedJob);
     cm.dispose();
   }
 }
