@@ -6,6 +6,17 @@ var status = 0;
 var fee = 1000000; // 算一次命的香油錢
 var random = parseInt((Math.random() * 100) + 1);
 
+// 抽籤結果
+// [random下限, random上限, 籤的id, 結果, 說明]
+var results = [
+  [0, 5, 4031065, "大吉", 2, "一分耕耘，一分收穫。你的運氣正像盛開的花朵，現在已結成果實，是收穫的季節了。"],
+  [5, 10, 4031066, "中吉", 1.8, "心中正直。理順法寬。聖無私語。終有分明。"],
+  [10, 45, 4031067, "小吉", 1.4, "因遇害反得利。因無心，反得益。不管遇到的是龍般的巨大或虎般的可怕，都當勇敢的去面對。若能如此，則能有益。"],
+  [45, 90, 4031069, "末吉", 1.2, "有否極泰來的好運，動起來就能提升運勢。"],
+  [90, 95, 4031070, "凶", -1, "雖然困難，如能克服，雲開月出的時機馬上到來。"],
+  [95, 100, 4031071, "大凶", -1.5, "命裡有時終須有，命裡無時莫強求。"],
+]
+
 // 日期處理
 var objDate = new Date();
 var month = objDate.getMonth();
@@ -59,7 +70,7 @@ function action(mode, type, selection) {
    */
   if (status == 0) {
      // 檢查今日是否已經抽過籤
-     if (cm.getBossLog2(year + "年" + monthList[month] + date + "日算命") !== 0) {
+     if (cm.getBossLog2(year + "年" + monthList[month] + date + "日算命") > 0) {
       cm.sendSimple("你今天已經算過命了，明天再來吧。");
       cm.dispose();
     } else {
@@ -84,31 +95,13 @@ function action(mode, type, selection) {
       // 記錄到 db
       cm.setBossLog2(year + "年" + monthList[month] + date + "日算命");
 
-      if (random <= 5) {
-        cm.sendOk("結果出爐:\r\n\r\n#v" + 4031065 + "#\r\n\r\n此籤為#r大吉#k。\r\n\r\n#b一分耕耘，一分收穫。你的運氣正像盛開的花朵，現在已結成果實，是收穫的季節了。#k");
-        cm.gainMeso(fee*2);
-        cm.gainExp(fee*0.009);
-        cm.dispose();
-      } else if (random > 5 && random <= 10) {
-        cm.sendOk("結果出爐:\r\n\r\n#v" + 4031066 + "#\r\n\r\n此籤為#r中吉#k。\r\n\r\n#b心中正直。理順法寬。聖無私語。終有分明。#k");
-        cm.gainMeso(fee*1.8);
-        cm.dispose();
-      } else if (random > 10 && random <= 45) {
-        cm.sendOk("結果出爐:\r\n\r\n#v" + 4031067 + "#\r\n\r\n此籤為#r小吉#k。\r\n\r\n#b因遇害反得利。因無心，反得益。不管遇到的是龍般的巨大或虎般的可怕，都當勇敢的去面對。若能如此，則能有益。#k");
-        cm.gainMeso(fee*1.4);
-        cm.dispose();
-      } else if (random > 45 && random <= 90) {
-        cm.sendOk("結果出爐:\r\n\r\n#v" + 4031069 + "#\r\n\r\n此籤為#r末吉#k。\r\n\r\n#b有否極泰來的好運，動起來就能提升運勢。#k");
-        cm.gainMeso(fee*1.2);
-        cm.dispose();
-      } else if (random > 90 && random <= 95) {
-        cm.sendOk("結果出爐 :\r\n\r\n#v" + 4031070 + "#\r\n\r\n此籤為#r凶#k。\r\n\r\n#b雖然困難，如能克服，雲開月出的時機馬上到來。#k");
-        cm.gainMeso(-fee);
-        cm.dispose();
-      } else if (random > 95 && random <= 100) {
-        cm.sendOk("結果出爐:\r\n\r\n#v" + 4031071 + "#\r\n\r\n 此籤為#r大凶#k。\r\n\r\n#b命裡有時終須有，命裡無時莫強求。#k");
-        cm.gainMeso(-fee * 1.5);
-        cm.dispose();
+      for (var i = 0; i < results.length; i++) {
+        if (random > results[i][0] && random <= results[i][1]) {
+          var msg = "結果出爐:\r\n\r\n#v" + results[i][2] + "#\r\n\r\n此籤為#r" + results[i][3] + "#k。\r\n\r\n#b" + results[i][5] + "#k";
+          cm.sendOk(msg);
+          cm.gainMeso(fee * results[i][4]);
+          cm.dispose();
+        }
       }
     }
   }
