@@ -1,14 +1,100 @@
-/* 	Cassandra */
-
+/**
+ * 等級獎勵兌換 NPC
+ * 2022/06/25 簡化
+ */
 var status = 0;
-var log = "1000";
-var log1 = "2000";
-var log2 = "3000";
-var log3 = "4000";
-var log4 = "5000";
-var log5 = "6000";
-var log6 = "7000";
-var log7 = "8000";
+var receiveStatus = []; // 領取狀態
+var log = [10, 30, 50, 70, 100, 120, 150, 200]; // 可領取獎勵等級
+var rewards = [ // 各等級獎勵
+  // 10 級
+  {
+    meso: 200000,
+    cash: 150,
+    list:[
+      { item: 1142070, count: 1 },
+      { item: 1112127, count: 1 },
+      { item: 2450000, count: 5 },
+      { item: 5220000, count: 5 },
+      { item: 2101120, count: 5 },
+    ]
+  },
+  // 30 級
+  {
+    meso: 200000,
+    cash: 150,
+    list:[
+      { item: 1142070, count: 1 },
+      { item: 1112127, count: 1 },
+      { item: 2450000, count: 5 },
+      { item: 5220000, count: 5 },
+      { item: 2101120, count: 5 },
+    ]
+  },
+  // 50 級
+  {
+    meso: 1000000,
+    cash: 150,
+    list:[
+      { item: 2000005, count: 5 },
+      { item: 2450000, count: 5 },
+      { item: 5220000, count: 5 },
+      { item: 2101120, count: 5 },
+    ]
+  },
+  // 70 級
+  {
+    meso: 1000000,
+    cash: 150,
+    list:[
+      { item: 1012168, count: 1 },
+      { item: 5220000, count: 5 },
+    ]
+  },
+  // 100 級
+  {
+    meso: 70000000,
+    cash: 250,
+    list:[
+      { item: 1112915, count: 1 },
+      { item: 5220000, count: 5 },
+      { item: 2450000, count: 3 },
+    ]
+  },
+  // 120 級
+  {
+    meso: 80000000,
+    cash: 350,
+    list:[
+      { item: 1113185, count: 1 },
+      { item: 2450000, count: 3 },
+      { item: 5220000, count: 5 },
+    ]
+  },
+  // 150 級
+  {
+    meso: 90000000,
+    cash: 450,
+    list:[
+      { item: 2450000, count: 3 },
+      { item: 5220000, count: 5 },
+    ]
+  },
+  // 200 級
+  {
+    meso: 100000000,
+    cash: 550,
+    list:[
+      { item: 5220000, count: 50 },
+    ]
+  }
+];
+
+// 格式化楓幣
+function thousands(num){
+  var str = num.toString();
+  var reg = str.indexOf(".") > -1 ? /(\d)(?=(\d{3})+\.)/g : /(\d)(?=(?:\d{3})+$)/g;
+  return str.replace(reg,"$1,");
+}
 
 function start() {
   status = -1;
@@ -16,225 +102,75 @@ function start() {
 }
 
 function action(mode, type, selection) {
+  var level = cm.getPlayer().getLevel();
+
   if (mode == -1) {
     cm.dispose();
   } else {
     if (status >= 0 && mode == 0) {
-      cm.sendOk("加油升級吧~");
+      cm.sendOk("加油升級吧！");
       cm.dispose();
       return;
     }
+
     if (mode == 1) {
       status++;
     } else {
       status--;
     }
+
     if (status == 0) {
-      /* 判斷是否領取或符合資格 */
-      if (cm.getBossLog2(log) >= 1) {
-        var text = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 10 && cm.getBossLog2(log) < 1) {
-        var text = "#r(可領取)#b";
-      } else {
-        var text = "";
+      // 判斷是否領取或符合資格
+      for (var i = 0; i < log.length; i++) {
+        var record = log[i] + "級獎勵";
+
+        if (cm.getBossLog2(record) >= 1) {
+          receiveStatus.push("#d(已領取)#b");
+        } else if (level >= log[i] && cm.getBossLog2(record) < 1) {
+          receiveStatus.push("#r(可領取)#b");
+        } else {
+          receiveStatus.push("");
+        }
       }
-      if (cm.getBossLog2(log1) >= 1) {
-        var text1 = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 30 && cm.getBossLog2(log1) < 1) {
-        var text1 = "#r(可領取)#b";
-      } else {
-        var text1 = "";
+
+      var msg = "#k請選擇你要領取的等級獎勵(#r請確保背包有5格以上空間#k)：";
+      for (var i = 0; i < log.length; i++) {
+        msg += "\r\n#L" + i + "##b領取" + log[i] + "級獎勵" + receiveStatus[i] + "#l";
       }
-      if (cm.getBossLog2(log2) >= 1) {
-        var text2 = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 50 && cm.getBossLog2(log2) < 1) {
-        var text2 = "#r(可領取)#b";
-      } else {
-        var text2 = "";
-      }
-      if (cm.getBossLog2(log3) >= 1) {
-        var text3 = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 70 && cm.getBossLog2(log3) < 1) {
-        var text3 = "#r(可領取)#b";
-      } else {
-        var text3 = "";
-      }
-      if (cm.getBossLog2(log4) >= 1) {
-        var text4 = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 100 && cm.getBossLog2(log4) < 1) {
-        var text4 = "#r(可領取)#b";
-      } else {
-        var text4 = "";
-      }
-      if (cm.getBossLog2(log5) >= 1) {
-        var text5 = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 120 && cm.getBossLog2(log5) < 1) {
-        var text5 = "#r(可領取)#b";
-      } else {
-        var text5 = "";
-      }
-      if (cm.getBossLog2(log6) >= 1) {
-        var text6 = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 150 && cm.getBossLog2(log6) < 1) {
-        var text6 = "#r(可領取)#b";
-      } else {
-        var text6 = "";
-      }
-      if (cm.getBossLog2(log7) >= 1) {
-        var text7 = "#d(已領取)#b";
-      } else if (cm.getPlayer().getLevel() >= 200 && cm.getBossLog2(log) < 7) {
-        var text7 = "#r(可領取)#b";
-      } else {
-        var text7 = "";
-      }
-      /*判斷結束*/
-      cm.sendSimple(
-        "#k請選擇你要領取的等級獎勵(#r請確保背包有5格以上空間#k)： \r\n#L0##b領10級獎勵" +
-          text +
-          "#l   \r\n#L1#領30級獎勵" +
-          text1 +
-          "#l    \r\n#L2#領50級獎勵" +
-          text2 +
-          "#l      \r\n#L3#領70級獎勵" +
-          text3 +
-          "#l  \r\n#L4#領100級獎勵" +
-          text4 +
-          "#l \r\n#L5#領120級獎勵" +
-          text5 +
-          "#l \r\n#L6#領150級獎勵" +
-          text6 +
-          "#l \r\n#L7#領200級獎勵" +
-          text7 +
-          "#l"
-      );
+      cm.sendSimple(msg);
     } else if (status == 1) {
-      if (selection == 0) {
-        if (cm.getBossLog2(log) >= 1) {
-          cm.sendOk("請確認你是否領取過或者等級已到達10級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 10) {
-          cm.setBossLog2(log);
-          cm.gainItem(1142070, 1);
-          cm.gainItem(1112127, 1);
-          cm.gainItem(2450000, 5); //獵人
-          cm.gainItem(2000005, 100);
-          cm.gainItem(5220000, 5);
-          cm.gainItem(2101120, 5);
-          cm.gainMeso(200000);
-          cm.sendOk(
-            "你已成功領取10級獎勵：1個#z1142070#、1個#z1112127#、5個#z2450000#、100個#z2000005#、5個#z5220000#、5個#z2101120#、20萬楓幣！"
-          );
-          cm.dispose();
+      var selected = log[selection];
+      var record = selected + "級獎勵";
+
+      if (cm.getBossLog2(record) >= 1) {
+        cm.sendOk("您已經領取過" + selected + "級獎勵了！做人不能太貪心！");
+        cm.dispose();
+      } else if (level >= selected) {
+        var msg = "#e========你已成功領取" + record + "#k：========#n\r\n";
+
+        // 記錄到 db
+        cm.setBossLog2(record);
+
+        // 獲取楓幣及 GASH
+        var meso = rewards[selection].meso;
+        var cash = rewards[selection].cash;
+        cm.gainMeso(meso);
+        cm.getPlayer().modifyCSPoints(1, cash, true);
+        msg += "#r" + thousands(meso) + "#k 楓幣\r\n#r" + cash + "#k GASH\r\n";
+
+        // 獲取道具獎勵
+        var rewardList = rewards[selection].list;
+        for (var i = 0; i < rewardList.length; i++) {
+          var item = rewardList[i].item;
+          var count = rewardList[i].count;
+          // 紀錄獲取的獎勵內容
+          msg += "#i" + item +"##z" + item + "# * #r" + count + "#k\r\n";
+          // 給予獎勵
+          cm.gainItem(item, count);
         }
-      } else if (selection == 1) {
-        if (cm.getBossLog2(log1) >= 1 || cm.getPlayer().getLevel() < 30) {
-          cm.sendOk("請確認你是否領取過或者等級已到達30級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 30) {
-          cm.setBossLog2(log1);
-          cm.gainItem(2450000, 5); //獵人
-          cm.gainItem(2000005, 100); //超水
-          cm.gainItem(5220000, 5); //轉蛋
-          cm.gainItem(2101120, 5); //魚包
-          cm.getPlayer().modifyCSPoints(1, 150, true);
-          cm.gainMeso(1000000);
-          cm.sendOk(
-            "你已成功領取30級獎勵：5個#z2450000#、100個#z2000005#、5個#z5220000#、5個#z2101120#、150 Cash、100萬楓幣！"
-          );
-          cm.dispose();
-        }
-      } else if (selection == 2) {
-        if (cm.getBossLog2(log2) >= 1 || cm.getPlayer().getLevel() < 50) {
-          cm.sendOk("請確認你是否領取過或者等級已到達50級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 50) {
-          cm.setBossLog2(log2);
-          cm.gainItem(2000005, 100); //超水
-          cm.gainItem(5220000, 5); //轉蛋
-          cm.gainItem(2101120, 5); //魚包
-          cm.getPlayer().modifyCSPoints(1, 150, true);
-          cm.gainMeso(1000000);
-          cm.sendOk(
-            "你已成功領取50級獎勵：100個#z2000005#、5個#z5220000#、150 Cash、100萬楓幣！"
-          );
-          cm.dispose();
-        }
-      } else if (selection == 3) {
-        if (cm.getBossLog2(log3) >= 1 || cm.getPlayer().getLevel() < 70) {
-          cm.sendOk("請確認你是否領取過或者等級已到達70級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 70) {
-          cm.setBossLog2(log3);
-          //cm.gainItem(2450000,3); //獵人
-          cm.gainItem(1012168, 1); //鬼洽
-          cm.gainItem(5220000, 5); //轉蛋
-          cm.getPlayer().modifyCSPoints(1, 150, true);
-          cm.gainMeso(1000000);
-          cm.sendOk(
-            "你已成功領取70級獎勵：1個#z1012168#、5個#z5220000#、150 Cash、100萬楓幣！"
-          );
-          cm.dispose();
-        }
-      } else if (selection == 4) {
-        if (cm.getBossLog2(log4) >= 1 || cm.getPlayer().getLevel() < 100) {
-          cm.sendOk("請確認你是否領取過或者等級已到達100級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 100) {
-          cm.setBossLog2(log4);
-          cm.gainItem(2450000, 3); //獵人
-          cm.gainItem(5220000, 5); //轉蛋
-          cm.gainItem(1112915, 1); //歡樂指環
-          cm.getPlayer().modifyCSPoints(1, 150, true);
-          cm.gainMeso(1000000);
-          cm.sendOk(
-            "你已成功領取100級獎勵：3個#z2450000#、1個#z1112915#、5個#z5220000#、150 Cash、100萬楓幣！"
-          );
-          cm.dispose();
-        }
-      } else if (selection == 5) {
-        if (cm.getBossLog2(log5) >= 1 || cm.getPlayer().getLevel() < 120) {
-          cm.sendOk("請確認你是否領取過或者等級已到達120級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 120) {
-          cm.setBossLog2(log5);
-          cm.gainItem(5220000, 5); //轉蛋
-          cm.gainItem(1113185, 1); //黑扉戒指
-          cm.getPlayer().modifyCSPoints(1, 150, true);
-          cm.gainMeso(1000000);
-          cm.sendOk(
-            "你已成功領取120級獎勵：1個#z1113185#、5個#z5220000#、150 Cash、100萬楓幣！"
-          );
-          cm.dispose();
-        }
-      } else if (selection == 6) {
-        if (cm.getBossLog2(log6) >= 1 || cm.getPlayer().getLevel() < 150) {
-          cm.sendOk("請確認你是否領取過或者等級已到達150級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 150) {
-          cm.setBossLog2(log6);
-          cm.gainItem(2450000, 3); //獵人
-          cm.gainItem(5220000, 5); //轉蛋
-          cm.getPlayer().modifyCSPoints(1, 150, true);
-          cm.gainMeso(1000000);
-          cm.sendOk(
-            "你已成功領取150級獎勵：3個#z2450000#、5個#z5220000#、150 Cash、100萬楓幣！"
-          );
-          cm.dispose();
-        }
-      } else if (selection == 7) {
-        if (cm.getBossLog2(log7) >= 1 || cm.getPlayer().getLevel() < 200) {
-          cm.sendOk("請確認你是否領取過或者等級已到達200級！");
-          cm.dispose();
-        } else if (cm.getPlayer().getLevel() >= 200) {
-          cm.setBossLog2(log7);
-          cm.gainItem(5220000, 5); //轉蛋
-          cm.getPlayer().modifyCSPoints(1, 150, true);
-          cm.gainMeso(1000000);
-          cm.sendOk(
-            "你已成功領取200級獎勵：5個#z5220000#、150 Cash、100萬楓幣！"
-          );
-          cm.dispose();
-        }
+
+        cm.sendOk(msg);
+        cm.dispose();
       }
     }
   }
