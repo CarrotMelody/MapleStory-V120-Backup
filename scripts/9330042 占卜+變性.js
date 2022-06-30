@@ -37,17 +37,17 @@ function action(mode, type, selection) {
     }
 
     if (mode == 1) {
-			status++;
-		} else {
-			status--;
-		}
+      status++;
+    } else {
+      status--;
+    }
 
     if (status == 0) {
       cm.sendYesNo("我掐指一算，你今天是來：\r\n #L0##r想算算今日運勢，占卜一下。#k#l \r\n #L1##d我要變性#k！#l");
     } else if (status == 1) {
       sel = selection;
       switch (sel) {
-				// 占卜
+        // 占卜
         case 0:
           if (cm.haveItem(5310000)) {
             cm.sendYesNo("占卜一次需要給我一個#k#v" + 5310000 + "##t" + 5310000 + "#！\r\n#L2##b我確定要占卜#l");
@@ -56,7 +56,7 @@ function action(mode, type, selection) {
             cm.dispose();
           }
           break;
-				// 變性
+          // 變性
         case 1:
           cm.sendYesNo("變性一次需要給我#b 1000 GASH #k的手術費才行...您目前身上還剩下#b " + cm.getPlayer().getCSPoints(1) + " GASH #k準備好要變性了嗎？\r\n #L3# #r準備好了！#k#l");
           break;
@@ -64,10 +64,10 @@ function action(mode, type, selection) {
     } else if (status == 2) {
       sel = selection;
       switch (sel) {
-				// 繼續占卜
+        // 繼續占卜
         case 2:
-					// 2000000: 紅色藥水, 因為跟御守同為消耗類所以拿它來判斷消耗欄是否足夠
-					// 5310000: 占卜所需要的幸運御守
+          // 2000000: 紅色藥水, 因為跟御守同為消耗類所以拿它來判斷消耗欄是否足夠
+          // 5310000: 占卜所需要的幸運御守
           if (cm.haveItem(5310000) && cm.canHold(2000000)) {
             if (chance > 0 && chance <= 14) {
               cm.sendOk("你的今日運勢普通:#d★★☆☆☆#k，送你一個#k#v" + icommon + "##b#t" + icommon + "##k吧！");
@@ -83,14 +83,14 @@ function action(mode, type, selection) {
           } else {
             cm.sendOk("請確認你的身上是否有#v" + 5310000 + "##t" + 5310000 + "#或者背包空間不足。");
           }
-					cm.dispose();
+          cm.dispose();
           break;
 				// 繼續變性
         case 3:
           if (cm.getPlayer().getCSPoints(1) > 1000) {
-						// 獲取角色性別
+            // 獲取角色性別
             var gender = cm.getPlayer().getGender();
-						// gender 0: 男, 1: 女
+            // gender 0: 男, 1: 女
             if (gender == 0) {
               cm.getPlayer().setGender(1);
             } else {
