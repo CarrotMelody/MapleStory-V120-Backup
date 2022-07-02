@@ -1,6 +1,6 @@
-/* 
+/*
  * This file is part of the OdinMS Maple Story Server
-    Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
+    Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc>
                        Matthias Butz <matze@odinms.de>
                        Jan Christian Meyer <vimes@odinms.de>
     This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
     GNU Affero General Public License for more details.
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	THIS  FILE WAS MADE BY JVLAPLE. REMOVING THIS NOTICE MEANS YOU CAN'T USE THIS SCRIPT OR ANY OTHER SCRIPT PROVIDED BY JVLAPLE.
  */
 
@@ -124,10 +124,9 @@ function playerDisconnected(eim, player) {
   }
 }
 
-function leftParty(eim, player) {
-}
+function leftParty(eim, player) {}
 
-function disbandParty(eim) {
+function disbandParty(eim) {}
 
 function playerExit(eim, player) {
   eim.unregisterPlayer(player);
@@ -149,8 +148,7 @@ function clearPQ(eim) {
   eim.dispose();
 }
 
-function allMonstersDead(eim) {
-}
+function allMonstersDead(eim) {}
 
 function cancelSchedule() {}
 
